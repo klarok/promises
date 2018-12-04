@@ -27,7 +27,25 @@ var getGitHubProfile = function(user, callback) {
   });
 };
 
-var getGitHubProfileAsync; // TODO
+var getGitHubProfileAsync = function (user) {
+  var profile = new Promise (function(resolve, reject) {
+    var options = {
+      url: 'https://api.github.com/users/' + user,
+      headers: { 'User-Agent': 'request' },
+      json: true  // will JSON.parse(body) for us
+    };
+
+    request.get(options, function(err, res, body) {
+      if (err || body.message) {
+        let errObj = new Error(err ? 'other error' : 'Failed to get GitHub profile');
+        reject(errObj);
+      } else {
+        resolve(body);
+      }
+    });
+  });
+  return profile;
+};
 
 
 // (2) Asyncronous token generation
@@ -38,8 +56,18 @@ var generateRandomToken = function(callback) {
   });
 };
 
-var generateRandomTokenAsync; // TODO
-
+var generateRandomTokenAsync = function() {
+  let token = new Promise(function(resolve, reject) {
+    crypto.randomBytes(20, function(err, buffer) {
+      if (err) { 
+        reject(new Error('error generating random token'));
+      } else {
+        resolve(buffer.toString('hex'));
+      }
+    });
+  });
+  return token;
+};
 
 // (3) Asyncronous file manipulation
 var readFileAndMakeItFunny = function(filePath, callback) {
@@ -56,7 +84,23 @@ var readFileAndMakeItFunny = function(filePath, callback) {
   });
 };
 
-var readFileAndMakeItFunnyAsync; // TODO
+var readFileAndMakeItFunnyAsync = function(filePath) {
+  let funnierFile = new Promise(function(resolve, reject) {
+    fs.readFile(filePath, 'utf8', function(err, file) {
+      if (err) {
+        reject(err);
+      } else {
+        var funnyFile = file.split('\n')
+          .map(function(line) {
+            return line + ' lol';
+          })
+          .join('\n');
+        resolve(funnyFile);
+      }
+    });
+  });
+  return funnierFile;
+}; // TODO
 
 // Export these functions so we can test them and reuse them in later exercises
 module.exports = {
